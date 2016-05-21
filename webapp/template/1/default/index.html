@@ -1,0 +1,268 @@
+[#escape x as (x)!?html]
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>${site.fullNameOrName}${global.customs['poweredby']}</title>
+<meta name="keywords" content="${node.keywords}"/>
+<meta name="description" content="${node.description}"/>
+<link href="_files/global.css" rel="stylesheet"/>
+<link href="_files/style.css" rel="stylesheet"/>
+[#include 'inc_js.html'/]
+</head>
+<body>
+[#include 'inc_header.html'/]
+<div class="w center mt10">
+	<div class="left w1">
+		<div class="mt10" style="margin-top:0px">
+			<div class="box3" style="border-top-width: 1px">
+				<div class="head b c-node fs14">热度排行</div>
+			</div>
+			<ul class="list-unstyled" style="padding:10px;">
+				[@InfoList sort='views desc' limit='12';list]
+				[#list list as info]
+				<li style="height:28px;line-height:28px;"><span class="left text-center [#if info_index<3]rank-top[#else]rank-normal[/#if]" style="margin-right:10px;">${info_index+1}</span><a class="a fs14" href="${info.url}" target="_blank" title="${info.title}">${substring(info.title,18,'...')}</a></li>
+				[/#list]
+				[/@InfoList]
+			</ul>
+		</div>
+	</div>
+	<div class="left w1 ml20">
+		<div class="box4">
+			<a class="b c-node fs14 a-hover" href="${getNode('news').url}">最新</a>
+		</div>
+		<div class="mt5">
+			[@InfoList attr='headlines' limit='3';list]
+			[#if list?size > 0]
+			<div class="text-center" style="height:38px;line-height:38px;">
+				<a class="fs14 b a-hover c-infoem" href="${list[0].url}" target="_blank" title="${list[0].title}">${substring(list[0].title,18,'...')}</a>
+			</div>
+			[/#if]
+			<ul class="list-unstyled text-center" style="height:30px;line-height:30px;">
+			[#list list as info]
+			[#if info_index > 0]
+				<li class="left" style="width:50%;">[<a class="a-hover c-infoem" href="${info.url}" target="_blank" title="${info.title}">${substring(info.title,11,'...')}</a>]</li>
+			[/#if]
+			[/#list]
+			</ul>
+			[/@InfoList]			
+		</div>
+		<ul class="mt10 info-list list-unstyled" style="border-top:1px dotted #d2e1f1;padding:10px 0;">
+			[@InfoList node='news' isIncludeChildren='true' limit='8';list]
+			[#list list as info]
+			<li class="item ico-point-blue">
+				<a class="fs14 [#if info_index=4 || info_index=9 || info.strong] c-infoem a-hover b[#else]a[/#if]" href="${info.url}" target="_blank" title="${info.title}">${substring(info.title,20,'...')}</a>
+			</li>
+			[#if info_index = 3 || info_index = 6]
+			<li class="spacing"></li>
+			[/#if]
+			[/#list]
+			[/@InfoList]
+			<div class="clear"></div>
+		</ul>
+	</div>
+	<div class="right w1">
+		<div class="box2 mt10">
+			<div class="head"><a class="b c-node fs14 a-hover" href="${ctx}/specials.jspx">专题</a></div>
+			[@SpecialList limit='2';list]
+			[#list list as special]
+			<div style="padding:10px;">
+				<a class="left" style="width:130px;" href="${ctx}/special/${special.id}.jspx" target="_blank" title="${special.title}">
+					<img src="${special.smallImageUrl}" width="130" height="87"/>
+				</a>
+				<div class="right" style="width:158px;margin-left:10px;">						
+					<div><a class="fs14 b a-hover c-infoem" href="${ctx}/special/${special.id}.jspx" title="${special.title}" target="_blank">${substring(special.title,10,'...')}</a></div>
+					<div class="mt5 c-desc">${substring(special.description,32,'...')} <a class="c-node a-all" href="${ctx}/special/${special.id}.jspx" target="_blank">[详细]</a></div>
+				</div>
+				<div class="clear"></div>
+			</div>
+			[/#list]	
+			[/@SpecialList]
+			[@SpecialList offset='2' limit='4';list]
+			<ul class="mt5 list-unstyled" style="padding:10px 10px;border-top:1px dotted #d2e1f1;">
+			[#list list as special]
+				<li style="height:26px;line-height:26px;"><a class="fs14 a" href="${ctx}/special/${special.id}.jspx" target="_blank" title="${special.title}">${substring(special.title,20,'...')}</a></li>
+			[/#list]
+			</ul>			
+			[/@SpecialList]
+		</div>
+	</div>
+	<div class="clear"></div>
+</div>
+
+<!-- <div class="w center">
+	<script src="${ctx}/dd_number/homepage.jspx"></script>
+</div> -->
+<div class="w center mt10">	
+	<div class="left w2">
+		[@NodeList parent='news';list]
+		[#list list as node]
+		<div class="w1 [#if node_index%2 = 0]left[#else]right ml20[/#if]">
+			<div class="box1">
+				<div class="head"><a class="b c-node fs14 a-hover" href="${node.url}">${node.name}</a></div>
+			</div>
+			[@InfoList nodeId=node.id isWithImage='true' limit='1';list]
+			[#list list as info]
+			<div style="padding:10px;">
+				<a class="left" style="width:130px;" href="${info.url}" target="_blank" title="${info.title}">
+					<img src="${info.smallImageUrl}" width="130" height="87"/>
+				</a>
+				<div class="right" style="width:158px;margin-left:10px;">						
+					<div><a class="fs14 b a-hover c-infoem" href="${info.url}" title="${info.title}" target="_blank">${substring(info.title,10,'...')}</a></div>
+					<div class="mt5 c-desc">${substring(info.description,32,'...')} <a class="c-node a-all" href="${info.url}" target="_blank">[详细]</a></div>
+				</div>
+				<div class="clear"></div>
+			</div>
+			[/#list]	
+			[/@InfoList]
+			[@InfoList nodeId=node.id limit='5';list]
+			<ul class="mt5 list-unstyled" style="padding:10px 10px;border-top:1px dotted #d2e1f1;">
+			[#list list as info]
+				<li class="ico-point-blue" style="padding-left:10px;height:26px;line-height:26px;"><a class="fs14 a" href="${info.url}" target="_blank" title="${info.title}">${substring(info.title,20,'...')}</a></li>
+			[/#list]
+			</ul>			
+			[/@InfoList]
+		</div>
+		[/#list]
+		<div class="clear"></div>
+		[/@NodeList]
+		
+		<div class="box1">
+			<div class="head">[@Node number='download';node]<a class="b c-node fs14 a-hover" href="${node.url}">${node.name}</a>[/@Node]</div>
+		</div>
+		<ul class="list-unstyled" style="padding:10px 0 10px 20px;">
+			[@InfoList node='download' isIncludeChildren='true' limit='9';list]
+			[#list list as info]
+			<li class="left" style="width:193px;padding-right:20px;">
+				<div class="left" style="padding:10px;"><img src="${info.smallImageUrl}" width="50" height="50"/></div>
+				<div class="left" style="padding-top:6px;width:123px;">
+					<div><a class="fs14 b c-infoem a-hover" href="${info.url}" target="_blank" title="${info.title}">${substring(info.title,10)}</a></div>
+					<div><a class="a" href="${info.node.url}">${info.node.name}</a></div>
+					<div style="color:#fe6500;">${info.customs['star']}</div>
+				</div>
+				<div class="clear"></div>
+			</li>
+			[/#list]
+			[/@InfoList]
+			<div class="clear"></div>
+		</ul>
+		
+		<div class="box1">
+			<div class="head">[@Node number='jobs';node]<a class="b c-node fs14 a-hover" href="${node.url}">${node.name}</a>[/@Node]</div>
+		</div>
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+			[@InfoList node='jobs' limit='6';list]
+			[#list list as info]
+			<tr style="height:35px; border-bottom:1px dotted #d2e1f1">
+				<td width="38%" valign="middle"><a href="${info.url}" class="fs14 c-infoem a-hover" style="padding-left:20px;" title="${info.title}">${substring(info.title,22,'...')}</a></td>
+				<td width="32%" valign="middle" class="c-desc">${info.customs['company']}</td>
+				<td width="15%" valign="middle" class="c-desc">${info.customs['location']}</td>
+				<td width="15%" valign="middle" class="c-desc">${info.publishDate?string('yyyy-MM-dd')}</td>
+			</tr>
+			[/#list]
+			[/@InfoList]
+		</table>
+	</div>
+	<div class="right w1">
+		<div class="box2">
+			<div class="head"><span class="b c-node fs14">点赞排行</span></div>
+			<ul class="list-unstyled" style="padding:10px 5px;">
+				[@InfoList sort='diggs desc' limit='6';list]
+				[#list list as info]
+				<li style="height:26px;line-height:26px;">
+					<span class="left b text-center" style="width:40px;margin:2px 5px;line-height:22px;color:#fe6500;background-color:#dae3e9;">${info.diggs}</span>
+					<a class="fs14 a" href="${info.url}" target="_blank" title="${info.title}">${substring(info.title,17,'...')}</a>
+				</li>
+				[/#list]				
+				[/@InfoList]
+			</ul>
+		</div>
+		<div class="box2 mt10">
+			<div class="head"><span class="b c-node fs14">最新评论</span></div>
+			<div>
+				[@CommentList limit='4';list]
+				<ul class="list-unstyled" style="line-height:1.8;padding:0 10px;">
+				[#list list as comment]
+					<li style="padding:10px 0;border-top:1px dotted #d2e1f1;">[#if comment.creator.id==0]<span class="b c-comment cert">匿名网友</span>[#else]<a href="${ctx}/space/${comment.creator.id}.jspx" target="_blank" class="b a-hover c-comment cert">${comment.creator.username}</a>[/#if]：<a class="c-comment a-hover" href="${comment.anchor.url}" target="_blank" title="${comment.anchor.title}">#${substring(comment.anchor.title,12,'...')}#</a>${substring(comment.text,22,'...')}</li>
+				[/#list]
+				</ul>			
+				[/@CommentList]
+			</div>
+		</div>
+		<div class="box2 mt10">
+			<div class="head"><a href="${ctx}/questions.jspx" class="b c-node fs14 a-none">调查问卷</a></div>
+			<div style="padding:0 10px;">
+				[@Question;question]
+				[#if question??]
+				<form action="${ctx}/questions/${question.id}/answer.jspx" method="post" id="questionForm">
+					<div class="text-center" style="padding:5px 10px;"><a class="c-infoem fs14 a-hover" href="${ctx}/questions/${question.id}.jspx" target="_blank">${question.title}</a></div>
+					[#list question.items as item]
+					<div class="" style="padding:5px 0;"><span class="fs14">${item_index+1}、${item.title}</span><label for="item_${item.id}" class="hide error"></label></div>
+					<ul class="list-unstyled" style="padding-left:6px;">
+						[#if !item.essay]
+						[#list item.options as option]
+						<li style="padding:5px 0;"><label><input type="[#if item.maxSelected==1]radio[#else]checkbox[/#if]" name="item_${item.id}" value="${option.id}" class="required" data-msg-required="必选项"/> ${option.title}</label></li>
+						[/#list]
+						[#else]
+						<textarea name="input_${item.id}" maxlength="2000" class="required" style="width:90%;height:80px;"></textarea>
+						[/#if]
+					</ul>
+					[/#list]
+					<input type="hidden" name="status_504" value="您已经参与过调查"/>
+					<input type="hidden" name="redirectUrl" value="${ctx}/questions/${question.id}/result.jspx"/>
+					<div class="text-center" style="padding:10px 0 20px 0;">
+						<input type="submit" value="提交"/> &nbsp;
+						<a class="a fs14" href="${ctx}/questions/${question.id}/result.jspx" target="_blank">查看结果</a>
+					</div>
+				</form>
+				<script>
+				$(function() {
+					$("#questionForm").validate();
+				});
+				</script>
+				[#else]
+				<div style="padding:10px;">没有投票</div>
+				[/#if]
+				[/@Question]
+			</div>
+		</div>
+		<div class="box2 mt10">
+			<div class="head"><span class="b c-node fs14">投票</span></div>
+			<div style="padding:0 10px;">
+				[@Vote;vote]
+				[#if vote??]
+				<div class="text-center" style="padding:5px 10px;"><a class="c-infoem fs14 a-hover" href="${ctx}/vote.jspx?id=${vote.id}" target="_blank">${vote.title?html}</a></div>
+				<form action="${ctx}/vote.jspx" method="post" id="voteForm">
+					<input type="hidden" name="id" value="${vote.id}"/>
+					<ul class="list-unstyled">
+						<label for="optionIds" class="hide error"></label>
+						[#list vote.options as option]
+						<li style="padding:5px 0;"><label><input type="[#if vote.maxSelected==1]radio[#else]checkbox[/#if]" name="optionIds" value="${option.id}" class="required" data-msg-required="请至少选择一项"/> ${option.title}</label></li>
+						[/#list]
+					</ul>
+					<input type="hidden" name="status_560" value="您已经投过票了"/>
+					<input type="hidden" name="redirectUrl" value="${ctx}/vote/{id}.jspx"/>
+					<div class="text-center" style="padding:10px 0 20px 0;">
+						<input type="submit" value="投票"/> &nbsp;
+						<a class="a fs14" href="${ctx}/vote/${vote.id}.jspx" target="_blank">查看结果</a>
+					</div>
+				</form>
+				<script>
+				$(function() {
+					$("#voteForm").validate();
+				});
+				</script>
+				[#else]
+				<div>没有投票</div>
+				[/#if]
+				[/@Vote]
+			</div>
+		</div>
+	</div>
+	<div class="clear"></div>
+</div>
+[#include 'inc_friendlink.html'/]
+[#include 'inc_footer.html'/]
+</body>
+</html>
+[/#escape]
