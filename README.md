@@ -1,4 +1,4 @@
-# jsxcms6
+# jspxcms6
 
 基于江西金智jspxcms6.1,做了一些修改和扩展,目前实现了原版本未开放的文库功能,依照原作者的[许可协议](http://www.jspxcms.com/license.html)保留了页脚相关的原作者的链接和名称.用于学习和参考
 
