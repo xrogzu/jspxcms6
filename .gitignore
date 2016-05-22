@@ -4,7 +4,7 @@
 .mtj.tmp/
 
 # Package Files #
-*.jar
+#*.jar
 *.war
 *.ear
 
@@ -13,3 +13,9 @@ hs_err_pid*
 /build
 /.settings
 .project
+*.docx
+*.pptx
+*.xslx
+*.swf
+*.pdf
+
