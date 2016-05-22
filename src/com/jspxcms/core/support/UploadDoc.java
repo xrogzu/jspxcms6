@@ -21,6 +21,12 @@ import com.artofsolving.jodconverter.openoffice.converter.OpenOfficeDocumentConv
 import com.jspxcms.common.file.FileHandler;
 import com.jspxcms.core.service.AttachmentService;
 
+/**
+ * openOffice连接池实现,以达到连接复用
+ * 
+ * @author suenlai
+ *
+ */
 class OpenOfficeConnectionPool {
 	private Queue<OpenOfficeConnection>	connectionQueue	= null;
 	private int							initCount		= 5;
