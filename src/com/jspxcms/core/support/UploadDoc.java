@@ -23,7 +23,7 @@ import com.jspxcms.core.service.AttachmentService;
 
 /**
  * openOffice连接池实现,以达到连接复用
- * 
+ *
  * @author suenlai
  *
  */
@@ -159,6 +159,7 @@ public class UploadDoc {
 				// use sending stream method to avoid moving tempFile
 				fileHandler.storeFile(FileUtils.openInputStream(file), pathname);
 			} else if ("pdf".equals(extension)) {
+				tempPdfFile = file;
 				tempSwfFile = pdf2Swf(attachmentService, fileHandler, pathname, extension, pdfPathname, swfPathname,
 						file, ip, userId, siteId);
 			} else {
