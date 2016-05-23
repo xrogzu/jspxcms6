@@ -11,8 +11,17 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.imgscalr.Scalr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.google.common.net.HttpHeaders;
 import com.jspxcms.common.file.FileHandler;
 import com.jspxcms.common.image.Images;
 import com.jspxcms.common.image.ScaleParam;
