@@ -13,6 +13,7 @@
 	[#if user??]
 	<span class="c666">${user.username}</span>,您好 
 	<a class="topa ml5" href="${ctx}/space/${user.id}.jspx">我的空间</a>
+	<a class="topa ml5" href="${ctx}/cmscp/index.do" style="display: inline-block;background-color: #97E659;height: 25px;line-height: 25px;color: #fff;border-radius: 3px;">发布wiki</a>
 	| <a class="topa" href="${ctx}/my.jspx">设置</a>
 	| <a class="topa" href="${ctx}/logout.jspx">退出</a>
 	[#else]
