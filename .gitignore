@@ -12,7 +12,7 @@
 hs_err_pid*
 /build
 /.settings
-/externalToolBuilders
+/.externalToolBuilders
 .project
 *.docx
 *.pptx
