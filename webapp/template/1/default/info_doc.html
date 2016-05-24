@@ -34,8 +34,7 @@
 			<script type="text/javascript">
 				 $("#info_comments").load("${dy}/info_comments/${info.id}.jspx?d="+new Date()*1);
 			</script>
-			<span class="info-detail"><a href="${info.docPdf}">${info.docName}PDF</a></span>
-			<span class="info-detail"><a href="${info.doc}">${info.docName}原文档</a></span>
+			<span class="info-detail"><a href="${info.docPdf}" target="_blank">${info.docName}</a></span>
 		</div>
 		<div id="docViewer" class="mt20" style="height:750px"></div>		  
 		<script type="text/javascript">
