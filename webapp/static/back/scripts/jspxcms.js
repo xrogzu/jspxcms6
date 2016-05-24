@@ -172,7 +172,7 @@ Cms.swfUploadDoc = function(name, settings) {
 			if($(":input[name=metaDescription]").size()>0){
 				$(":input[name=metaDescription]").text(data.fullText.substring(0,400)).change();
 			}
-			if(!editor_clobs_text){
+			if(editor_clobs_text){
 				editor_clobs_text.setContent(data.fullText);
 			}
 		}
