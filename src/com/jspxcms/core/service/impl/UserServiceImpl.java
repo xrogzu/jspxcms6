@@ -33,6 +33,7 @@ import com.jspxcms.common.security.Digests;
 import com.jspxcms.common.util.Encodes;
 import com.jspxcms.core.domain.GlobalMail;
 import com.jspxcms.core.domain.GlobalRegister;
+import com.jspxcms.core.domain.Role;
 import com.jspxcms.core.domain.Site;
 import com.jspxcms.core.domain.User;
 import com.jspxcms.core.domain.UserDetail;
@@ -43,6 +44,7 @@ import com.jspxcms.core.repository.UserDao;
 import com.jspxcms.core.service.GlobalService;
 import com.jspxcms.core.service.MemberGroupService;
 import com.jspxcms.core.service.OrgService;
+import com.jspxcms.core.service.RoleService;
 import com.jspxcms.core.service.UserDetailService;
 import com.jspxcms.core.service.UserMemberGroupService;
 import com.jspxcms.core.service.UserOrgService;
@@ -53,50 +55,46 @@ import com.jspxcms.core.support.DeleteException;
 
 /**
  * UserServiceImpl
- * 
+ *
  * @author liufang
- * 
+ *
  */
 @Service
 @Transactional(readOnly = true)
-public class UserServiceImpl implements UserService, OrgDeleteListener,
-		MemberGroupDeleteListener {
+public class UserServiceImpl implements UserService, OrgDeleteListener, MemberGroupDeleteListener {
 	private static final int SALT_SIZE = 8;
 
-	public Page<User> findPage(Integer rank, Integer[] type,
-			String orgTreeNumber, Map<String, String[]> params,
+	@Override
+	public Page<User> findPage(Integer rank, Integer[] type, String orgTreeNumber, Map<String, String[]> params,
 			Pageable pageable) {
 		return dao.findAll(spec(rank, type, orgTreeNumber, params), pageable);
 	}
 
-	public RowSide<User> findSide(Integer rank, Integer[] type,
-			String orgTreeNumber, Map<String, String[]> params, User bean,
-			Integer position, Sort sort) {
+	@Override
+	public RowSide<User> findSide(Integer rank, Integer[] type, String orgTreeNumber, Map<String, String[]> params,
+			User bean, Integer position, Sort sort) {
 		if (position == null) {
 			return new RowSide<User>();
 		}
 		Limitable limit = RowSide.limitable(position, sort);
-		List<User> list = dao.findAll(spec(rank, type, orgTreeNumber, params),
-				limit);
+		List<User> list = dao.findAll(spec(rank, type, orgTreeNumber, params), limit);
 		return RowSide.create(list, bean);
 	}
 
-	private Specification<User> spec(final Integer rank, final Integer[] type,
-			final String orgTreeNumber, Map<String, String[]> params) {
+	private Specification<User> spec(final Integer rank, final Integer[] type, final String orgTreeNumber,
+			Map<String, String[]> params) {
 		Collection<SearchFilter> filters = SearchFilter.parse(params).values();
 		final Specification<User> fsp = SearchFilter.spec(filters, User.class);
 		Specification<User> sp = new Specification<User>() {
-			public Predicate toPredicate(Root<User> root,
-					CriteriaQuery<?> query, CriteriaBuilder cb) {
+			@Override
+			public Predicate toPredicate(Root<User> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
 				Predicate pred = fsp.toPredicate(root, query, cb);
 				pred = cb.and(pred, cb.ge(root.<Integer> get("rank"), rank));
 				if (ArrayUtils.isNotEmpty(type)) {
-					pred = cb.and(pred, root.get("type")
-							.in(Arrays.asList(type)));
+					pred = cb.and(pred, root.get("type").in(Arrays.asList(type)));
 				}
 				if (StringUtils.isNotBlank(orgTreeNumber)) {
-					Path<String> orgsPath = root.join("org").<String> get(
-							"treeNumber");
+					Path<String> orgsPath = root.join("org").<String> get("treeNumber");
 					pred = cb.and(pred, cb.like(orgsPath, orgTreeNumber + "%"));
 					query.distinct(true);
 				}
@@ -106,34 +104,42 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return sp;
 	}
 
+	@Override
 	public List<User> findByUsername(String[] usernames) {
 		return dao.findByUsername(usernames);
 	}
 
+	@Override
 	public User getAnonymous() {
 		return dao.findOne(0);
 	}
 
+	@Override
 	public Integer getAnonymousId() {
 		return 0;
 	}
 
+	@Override
 	public User get(Integer id) {
 		return dao.findOne(id);
 	}
 
+	@Override
 	public User findByUsername(String username) {
 		return dao.findByUsername(username);
 	}
 
+	@Override
 	public User findByValidation(String type, String key) {
 		return dao.findByValidationTypeAndValidationKey(type, key);
 	}
 
+	@Override
 	public boolean usernameExist(String username) {
 		return dao.countByUsername(username) > 0;
 	}
 
+	@Override
 	@Transactional
 	public void updatePassword(Integer userId, String rawPassword) {
 		User user = get(userId);
@@ -142,6 +148,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		dao.save(user);
 	}
 
+	@Override
 	@Transactional
 	public void updateEmail(Integer userId, String email) {
 		User user = get(userId);
@@ -149,9 +156,9 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		dao.save(user);
 	}
 
+	@Override
 	@Transactional
-	public void sendVerifyEmail(Site site, User user, GlobalMail mail,
-			String subject, String text) {
+	public void sendVerifyEmail(Site site, User user, GlobalMail mail, String subject, String text) {
 		UserDetail detail = user.getDetail();
 		String key = StringUtils.remove(UUID.randomUUID().toString(), '-');
 		user.setValidationKey(key);
@@ -159,17 +166,16 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		detail.setValidationDate(new Date());
 		detail.setValidationValue(null);
 
-		String url = site.getProtocol() + ":" + site.getUrlFull()
-				+ Constants.VERIFY_MEMBER_URL + key;
+		String url = site.getProtocol() + ":" + site.getUrlFull() + Constants.VERIFY_MEMBER_URL + key;
 		String email = user.getEmail();
 		String username = user.getUsername();
 		String sitename = site.getFullNameOrName();
-		subject = GlobalRegister.replaceVerifyEmail(subject, username,
-				sitename, url);
+		subject = GlobalRegister.replaceVerifyEmail(subject, username, sitename, url);
 		text = GlobalRegister.replaceVerifyEmail(text, username, sitename, url);
 		mail.sendMail(new String[] { email }, subject, text);
 	}
 
+	@Override
 	@Transactional
 	public User verifyMember(User user) {
 		if (user == null || !user.isUnactivated()) {
@@ -185,9 +191,9 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return user;
 	}
 
+	@Override
 	@Transactional
-	public void sendPasswordEmail(Site site, User user, GlobalMail mail,
-			String subject, String text) {
+	public void sendPasswordEmail(Site site, User user, GlobalMail mail, String subject, String text) {
 		UserDetail detail = user.getDetail();
 		String key = StringUtils.remove(UUID.randomUUID().toString(), '-');
 		user.setValidationKey(key);
@@ -195,18 +201,16 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		detail.setValidationDate(new Date());
 		detail.setValidationValue(null);
 
-		String url = site.getProtocol() + ":" + site.getUrlFull()
-				+ Constants.RETRIEVE_PASSWORD_URL + key;
+		String url = site.getProtocol() + ":" + site.getUrlFull() + Constants.RETRIEVE_PASSWORD_URL + key;
 		String email = user.getEmail();
 		String username = user.getUsername();
 		String sitename = site.getFullNameOrName();
-		subject = GlobalRegister.replacePasswordEmail(subject, username,
-				sitename, url);
-		text = GlobalRegister.replacePasswordEmail(text, username, sitename,
-				url);
+		subject = GlobalRegister.replacePasswordEmail(subject, username, sitename, url);
+		text = GlobalRegister.replacePasswordEmail(text, username, sitename, url);
 		mail.sendMail(new String[] { email }, subject, text);
 	}
 
+	@Override
 	@Transactional
 	public User passwordChange(User user, String rawPassword) {
 		if (user == null) {
@@ -223,6 +227,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return user;
 	}
 
+	@Override
 	@Transactional
 	public User deletePassword(Integer id) {
 		User bean = get(id);
@@ -230,6 +235,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return bean;
 	}
 
+	@Override
 	@Transactional
 	public User[] deletePassword(Integer[] ids) {
 		User[] beans = new User[ids.length];
@@ -239,6 +245,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return beans;
 	}
 
+	@Override
 	@Transactional
 	public User check(Integer id) {
 		User bean = get(id);
@@ -248,6 +255,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return bean;
 	}
 
+	@Override
 	@Transactional
 	public User[] check(Integer[] ids) {
 		User[] beans = new User[ids.length];
@@ -257,6 +265,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return beans;
 	}
 
+	@Override
 	@Transactional
 	public User lock(Integer id) {
 		User bean = get(id);
@@ -266,6 +275,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return bean;
 	}
 
+	@Override
 	@Transactional
 	public User[] lock(Integer[] ids) {
 		User[] beans = new User[ids.length];
@@ -275,6 +285,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return beans;
 	}
 
+	@Override
 	@Transactional
 	public User unlock(Integer id) {
 		User bean = get(id);
@@ -284,6 +295,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return bean;
 	}
 
+	@Override
 	@Transactional
 	public User[] unlock(Integer[] ids) {
 		User[] beans = new User[ids.length];
@@ -293,10 +305,10 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return beans;
 	}
 
+	@Override
 	@Transactional
-	public User save(User bean, UserDetail detail, Integer[] roleIds,
-			Integer[] orgIds, Integer[] groupIds, Integer orgId,
-			Integer groupId, String ip) {
+	public User save(User bean, UserDetail detail, Integer[] roleIds, Integer[] orgIds, Integer[] groupIds,
+			Integer orgId, Integer groupId, String ip) {
 		bean.setOrg(orgService.get(orgId));
 		bean.setGroup(groupService.get(groupId));
 		bean.setGlobal(globalService.findUnique());
@@ -313,9 +325,9 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 
 	/**
 	 * 注册用户
-	 * 
+	 *
 	 * 验证模式（发邮件）
-	 * 
+	 *
 	 * @param groupId
 	 *            会员组ID
 	 * @param orgId
@@ -334,11 +346,11 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 	 * @param weixin
 	 * @return
 	 */
+	@Override
 	@Transactional
-	public User register(String ip, int groupId, int orgId, int status,
-			String username, String password, String email, String qqOpenid,
-			String weiboUid, String gender, Date birthDate, String bio,
-			String comeFrom, String qq, String msn, String weixin) {
+	public User register(String ip, int groupId, int orgId, int status, String username, String password, String email,
+			String qqOpenid, String weiboUid, String gender, Date birthDate, String bio, String comeFrom, String qq,
+			String msn, String weixin) {
 		User user = new User();
 		user.setUsername(username);
 		user.setRawPassword(password);
@@ -361,10 +373,51 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return user;
 	}
 
+	/**
+	 *
+	 */
+	@Override
 	@Transactional
-	public User update(User bean, UserDetail detail, Integer[] roleIds,
-			Integer[] orgIds, Integer[] groupIds, Integer orgId,
-			Integer groupId, Integer topOrgId, Integer siteId) {
+	public User registerAdmin(String ip, int groupId, int orgId, int siteId, int status, String username,
+			String password, String email, String qqOpenid, String weiboUid, String gender, Date birthDate, String bio,
+			String comeFrom, String qq, String msn, String weixin) {
+		User user = new User();
+		user.setUsername(username);
+		user.setRawPassword(password);
+		user.setEmail(email);
+		user.setQqOpenid(qqOpenid);
+		user.setWeiboUid(weiboUid);
+		user.setGender(gender);
+		user.setBirthDate(birthDate);
+		user.setStatus(status);
+		user.setType(User.ADMIN);
+
+		UserDetail detail = new UserDetail();
+		detail.setBio(bio);
+		detail.setComeFrom(comeFrom);
+		detail.setQq(qq);
+		detail.setMsn(msn);
+		detail.setWeixin(weixin);
+
+		Integer[] groupIds = new Integer[] { groupId };
+		Integer[] orgIds = new Integer[] { orgId };
+
+		List<Role> roleList = roleService.findList(siteId);
+		Integer[] roleIds = new Integer[roleList.size()];
+		for (int i = 0; i < roleIds.length; i++) {
+			if (!StringUtils.equals(roleList.get(i).getName(), "管理员")) {
+				roleIds[i] = roleList.get(i).getId();
+			}
+		}
+
+		save(user, detail, roleIds, orgIds, groupIds, orgId, groupId, ip);
+		return user;
+	}
+
+	@Override
+	@Transactional
+	public User update(User bean, UserDetail detail, Integer[] roleIds, Integer[] orgIds, Integer[] groupIds,
+			Integer orgId, Integer groupId, Integer topOrgId, Integer siteId) {
 		if (orgId != null) {
 			bean.setOrg(orgService.get(orgId));
 		}
@@ -391,6 +444,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return bean;
 	}
 
+	@Override
 	@Transactional
 	public User update(User user, UserDetail detail) {
 		dao.save(user);
@@ -402,14 +456,14 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		User entity = dao.findOne(id);
 		if (entity != null) {
 			if (entity.getId() <= 1) {
-				throw new IllegalStateException(
-						"User 0(anonymous) or 1(admin) cannot be delete!");
+				throw new IllegalStateException("User 0(anonymous) or 1(admin) cannot be delete!");
 			}
 			dao.delete(entity);
 		}
 		return entity;
 	}
 
+	@Override
 	@Transactional
 	public User delete(Integer id) {
 		if (id == null) {
@@ -420,6 +474,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		return bean;
 	}
 
+	@Override
 	@Transactional
 	public User[] delete(Integer[] ids) {
 		if (ids == null) {
@@ -439,7 +494,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 	}
 
 	private void entryptPassword(User user) {
-		byte[] saltBytes = Digests.generateSalt(SALT_SIZE);
+		byte[] saltBytes = Digests.generateSalt(UserServiceImpl.SALT_SIZE);
 		String salt = Encodes.encodeHex(saltBytes);
 		user.setSalt(salt);
 
@@ -448,6 +503,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		user.setPassword(encPass);
 	}
 
+	@Override
 	public void preMemberGroupDelete(Integer[] ids) {
 		if (ArrayUtils.isNotEmpty(ids)) {
 			if (dao.countByGroupId(Arrays.asList(ids)) > 0) {
@@ -456,6 +512,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		}
 	}
 
+	@Override
 	public void preOrgDelete(Integer[] ids) {
 		if (ArrayUtils.isNotEmpty(ids)) {
 			if (dao.countByOrgId(Arrays.asList(ids)) > 0) {
@@ -480,14 +537,21 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 		this.deleteListeners = deleteListeners;
 	}
 
-	private GlobalService globalService;
-	private UserOrgService userOrgService;
-	private UserMemberGroupService userMemberGroupService;
-	private UserRoleService userRoleService;
-	private OrgService orgService;
-	private MemberGroupService groupService;
-	private UserDetailService detailService;
-	private CredentialsDigest credentialsDigest;
+	private GlobalService			globalService;
+	private UserOrgService			userOrgService;
+	private UserMemberGroupService	userMemberGroupService;
+	private UserRoleService			userRoleService;
+	private OrgService				orgService;
+	private MemberGroupService		groupService;
+	private UserDetailService		detailService;
+	private CredentialsDigest		credentialsDigest;
+
+	private RoleService				roleService;
+
+	@Autowired
+	public void setRoleService(RoleService roleService) {
+		this.roleService = roleService;
+	}
 
 	@Autowired
 	public void setGlobalService(GlobalService globalService) {
@@ -500,8 +564,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener,
 	}
 
 	@Autowired
-	public void setUserMemberGroupService(
-			UserMemberGroupService userMemberGroupService) {
+	public void setUserMemberGroupService(UserMemberGroupService userMemberGroupService) {
 		this.userMemberGroupService = userMemberGroupService;
 	}
 

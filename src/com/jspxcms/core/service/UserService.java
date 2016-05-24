@@ -16,18 +16,16 @@ import com.jspxcms.core.domain.UserDetail;
 
 /**
  * UserService
- * 
+ *
  * @author liufang
- * 
+ *
  */
 public interface UserService {
-	public Page<User> findPage(Integer rank, Integer[] type,
-			String orgTreeNumber, Map<String, String[]> params,
+	public Page<User> findPage(Integer rank, Integer[] type, String orgTreeNumber, Map<String, String[]> params,
 			Pageable pageable);
 
-	public RowSide<User> findSide(Integer rank, Integer[] type,
-			String orgTreeNumber, Map<String, String[]> params, User bean,
-			Integer position, Sort sort);
+	public RowSide<User> findSide(Integer rank, Integer[] type, String orgTreeNumber, Map<String, String[]> params,
+			User bean, Integer position, Sort sort);
 
 	public List<User> findByUsername(String[] usernames);
 
@@ -47,28 +45,49 @@ public interface UserService {
 
 	public void updateEmail(Integer userId, String email);
 
-	public void sendVerifyEmail(Site site, User user, GlobalMail mail,
-			String subject, String text);
+	public void sendVerifyEmail(Site site, User user, GlobalMail mail, String subject, String text);
 
 	public User verifyMember(User user);
 
-	public void sendPasswordEmail(Site site, User user, GlobalMail mail,
-			String subject, String text);
+	public void sendPasswordEmail(Site site, User user, GlobalMail mail, String subject, String text);
 
 	public User passwordChange(User user, String rawPassword);
 
-	public User save(User bean, UserDetail detail, Integer[] roleIds,
-			Integer[] orgIds, Integer[] groupIds, Integer orgId,
-			Integer groupId, String ip);
+	public User save(User bean, UserDetail detail, Integer[] roleIds, Integer[] orgIds, Integer[] groupIds,
+			Integer orgId, Integer groupId, String ip);
 
-	public User register(String ip, int groupId, int orgId, int status,
-			String username, String password, String email, String qqOpenid,
-			String weiboUid, String gender, Date birthDate, String bio,
+	public User register(String ip, int groupId, int orgId, int status, String username, String password, String email,
+			String qqOpenid, String weiboUid, String gender, Date birthDate, String bio, String comeFrom, String qq,
+			String msn, String weixin);
+
+	/**
+	 * 用于注册管理员
+	 *
+	 * @param ip
+	 * @param groupId
+	 * @param orgId
+	 * @param status
+	 * @param username
+	 * @param password
+	 * @param email
+	 * @param qqOpenid
+	 * @param weiboUid
+	 * @param gender
+	 * @param birthDate
+	 * @param bio
+	 * @param comeFrom
+	 * @param qq
+	 * @param msn
+	 * @param weixin
+	 * @param roleIds
+	 * @return
+	 */
+	public User registerAdmin(String ip, int groupId, int orgId, int siteId, int status, String username,
+			String password, String email, String qqOpenid, String weiboUid, String gender, Date birthDate, String bio,
 			String comeFrom, String qq, String msn, String weixin);
 
-	public User update(User bean, UserDetail detail, Integer[] roleIds,
-			Integer[] orgIds, Integer[] groupIds, Integer orgId,
-			Integer groupId, Integer topOrgId, Integer siteId);
+	public User update(User bean, UserDetail detail, Integer[] roleIds, Integer[] orgIds, Integer[] groupIds,
+			Integer orgId, Integer groupId, Integer topOrgId, Integer siteId);
 
 	public User update(User user, UserDetail detail);
 
