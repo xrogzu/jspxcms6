@@ -153,17 +153,13 @@ public class UploadDoc {
 						file, ip, userId, siteId);
 				tempSwfFile = pdf2Swf(attachmentService, fileHandler, pathname, extension, pdfPathname, swfPathname,
 						tempPdfFile, ip, userId, siteId);
-				// store attachement
-				attachmentService.save(pdfPathname, tempPdfFile.length(), ip, userId, siteId);
-
 				// use sending stream method to avoid moving tempFile
 				fileHandler.storeFile(FileUtils.openInputStream(file), pathname);
-			} else if ("pdf".equals(extension)) {
+			} else {
+				fileHandler.storeFile(FileUtils.openInputStream(file), pathname);
 				tempPdfFile = file;
 				tempSwfFile = pdf2Swf(attachmentService, fileHandler, pathname, extension, pdfPathname, swfPathname,
 						file, ip, userId, siteId);
-			} else {
-				// do nothing
 			}
 			//
 			tempImageFile = Pdf2CoverPng(attachmentService, fileHandler, pdfPathname, imagePathname, tempPdfFile, ip,
@@ -178,7 +174,9 @@ public class UploadDoc {
 			if (tempSwfFile != null) {
 				attachmentService.save(swfPathname, tempSwfFile.length(), ip, userId, siteId);
 			}
-		} finally {
+		} finally
+
+		{
 			// clear tempFile
 			FileUtils.deleteQuietly(tempSwfFile);
 			FileUtils.deleteQuietly(tempPdfFile);
