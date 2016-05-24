@@ -154,7 +154,7 @@
 			[@InfoList node='jobs' limit='6';list]
 			[#list list as info]
 			<tr style="height:35px; border-bottom:1px dotted #d2e1f1">
-				<td width="38%" valign="middle"><a href="${info.url}" class="fs14 c-infoem a-hover" style="padding-left:20px;" title="${info.title}">${substring(info.title,22,'...')}</a></td>
+				<td width="38%" valign="middle"><a href="${info.url}" class="fs14 c-infoem a-hover" style="padding-left:20px;" title="${info.title}">${substring(info.title,16,'...')}</a></td>
 				<td width="32%" valign="middle" class="c-desc">${info.customs['company']}</td>
 				<td width="15%" valign="middle" class="c-desc">${info.customs['location']}</td>
 				<td width="15%" valign="middle" class="c-desc">${info.publishDate?string('yyyy-MM-dd')}</td>
