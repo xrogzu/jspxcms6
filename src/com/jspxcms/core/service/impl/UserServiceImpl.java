@@ -33,7 +33,6 @@ import com.jspxcms.common.security.Digests;
 import com.jspxcms.common.util.Encodes;
 import com.jspxcms.core.domain.GlobalMail;
 import com.jspxcms.core.domain.GlobalRegister;
-import com.jspxcms.core.domain.Role;
 import com.jspxcms.core.domain.Site;
 import com.jspxcms.core.domain.User;
 import com.jspxcms.core.domain.UserDetail;
@@ -378,9 +377,9 @@ public class UserServiceImpl implements UserService, OrgDeleteListener, MemberGr
 	 */
 	@Override
 	@Transactional
-	public User registerAdmin(String ip, int groupId, int orgId, int siteId, int status, String username,
-			String password, String email, String qqOpenid, String weiboUid, String gender, Date birthDate, String bio,
-			String comeFrom, String qq, String msn, String weixin) {
+	public User registerAdmin(String ip, int roleId, int groupId, int orgId, int status, String username,
+			String password, String realName, String email, String qqOpenid, String weiboUid, String gender,
+			Date birthDate, String bio, String comeFrom, String qq, String msn, String weixin) {
 		User user = new User();
 		user.setUsername(username);
 		user.setRawPassword(password);
@@ -391,6 +390,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener, MemberGr
 		user.setBirthDate(birthDate);
 		user.setStatus(status);
 		user.setType(User.ADMIN);
+		user.setRealName(realName);
 
 		UserDetail detail = new UserDetail();
 		detail.setBio(bio);
@@ -401,14 +401,7 @@ public class UserServiceImpl implements UserService, OrgDeleteListener, MemberGr
 
 		Integer[] groupIds = new Integer[] { groupId };
 		Integer[] orgIds = new Integer[] { orgId };
-
-		List<Role> roleList = roleService.findList(siteId);
-		Integer[] roleIds = new Integer[roleList.size()];
-		for (int i = 0; i < roleIds.length; i++) {
-			if (!StringUtils.equals(roleList.get(i).getName(), "管理员")) {
-				roleIds[i] = roleList.get(i).getId();
-			}
-		}
+		Integer[] roleIds = new Integer[] { roleId };
 
 		save(user, detail, roleIds, orgIds, groupIds, orgId, groupId, ip);
 		return user;

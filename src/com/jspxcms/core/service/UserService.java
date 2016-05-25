@@ -82,9 +82,9 @@ public interface UserService {
 	 * @param roleIds
 	 * @return
 	 */
-	public User registerAdmin(String ip, int groupId, int orgId, int siteId, int status, String username,
-			String password, String email, String qqOpenid, String weiboUid, String gender, Date birthDate, String bio,
-			String comeFrom, String qq, String msn, String weixin);
+	public User registerAdmin(String ip, int roleId, int groupId, int orgId, int status, String username,
+			String password, String realName, String email, String qqOpenid, String weiboUid, String gender,
+			Date birthDate, String bio, String comeFrom, String qq, String msn, String weixin);
 
 	public User update(User bean, UserDetail detail, Integer[] roleIds, Integer[] orgIds, Integer[] groupIds,
 			Integer orgId, Integer groupId, Integer topOrgId, Integer siteId);

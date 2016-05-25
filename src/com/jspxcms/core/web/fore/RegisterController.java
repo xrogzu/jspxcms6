@@ -207,8 +207,8 @@ public class RegisterController {
 	 * @return
 	 */
 	@RequestMapping(value = "/registerAdmin.jspx", method = RequestMethod.POST)
-	public String registerAdminSubmit(String captcha, String username, String password, String email, String gender,
-			Date birthDate, String bio, String comeFrom, String qq, String msn, String weixin,
+	public String registerAdminSubmit(Integer roleId, String captcha, String username, String password, String email,
+			String gender, Date birthDate, String bio, String comeFrom, String qq, String msn, String weixin,
 			HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model modelMap) {
 		Response resp = new Response(request, response, modelMap);
 		Site site = Context.getCurrentSite(request);
@@ -223,8 +223,8 @@ public class RegisterController {
 		int groupId = reg.getGroupId();
 		int orgId = reg.getOrgId();
 		int status = verifyMode == GlobalRegister.VERIFY_MODE_NONE ? User.NORMAL : User.UNACTIVATED;
-		User user = userService.registerAdmin(ip, groupId, orgId, site.getId(), status, username, password, email, null,
-				null, gender, birthDate, bio, comeFrom, qq, msn, weixin);
+		User user = userService.registerAdmin(ip, roleId, groupId, orgId, status, username, password, email, null, null,
+				gender, birthDate, bio, comeFrom, qq, msn, weixin);
 		if (verifyMode == GlobalRegister.VERIFY_MODE_EMAIL) {
 			GlobalMail mail = site.getGlobal().getMail();
 			String subject = reg.getVerifyEmailSubject();
