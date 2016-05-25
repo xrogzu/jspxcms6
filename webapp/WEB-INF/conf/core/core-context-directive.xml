@@ -44,6 +44,7 @@
 	<bean id="cmsGetNode" class="com.jspxcms.core.web.method.GetNodeMethod" />
 	<bean id="cmsGetInfo" class="com.jspxcms.core.web.method.GetInfoMethod" />
 	
+	<bean id="CmsRoleList" class="com.jspxcms.core.web.directive.RoleListDirective" />
 	<!-- <bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"> -->
 	<bean id="freemarkerConfig" class="com.jspxcms.common.freemarker.AdapterFreeMarkerConfigurer">
 		<property name="freemarkerVariables" value="#{property.getBeanMap('freemarkerVariables.')}"/>
