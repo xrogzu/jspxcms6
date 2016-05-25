@@ -54,7 +54,7 @@ $(function() {
 	<div class="footer text-center" style="padding:12px;border-top:1px solid #ccc;background-color:#f2f2f2;"><input type="button" onclick="$('#agreementDialog').hide();" value="同意并继续" style="padding:0 50px;height:32px;border-radius:3px;border:none;color:#fff;background-color:#e4393c;font-size:16px;font-family:'Microsoft YaHei';font-weight:bold;"/></div>
 </div>
 <div class="w center mt10 oh">
-	<a class="left" style="margin-left:50px;width:228px;height:90px;background:url(_files/img/logo.png) no-repeat;" href="${ctx}/"></a>
+	<a class="left" style="width:300px;height:90px;line-height: 90px;font-size: 26px;color:#000;text-decoration:none;font-weight:700" href="${ctx}/">${site.fullNameOrName}</a>
 	<div class="left ff-yh fs28 ml20 c-333" style="margin:30px 0 0 25px;padding-left:25px;border-left:1px solid #ddd;">用户注册</div>
 </div>
 <div class="center oh" style="width:1200px;background:url(_files/img/member_line_bg.png) 0 -1px no-repeat;">
@@ -62,10 +62,16 @@ $(function() {
 		<form id="validForm" action="${ctx}/registerAdmin.jspx" method="post">
 			<input type="hidden" name="redirectUrl" value="${ctx}/register_message.jspx?username={username}&email={email}&verifyMode={verifyMode}"/>
 			<div class="line">
-				<label for="username" class="label"><em class="required">*</em>用户名:</label>
+				<label for="username" class="label"><em class="required">*</em>域账号:</label>
 				<div class="input"><input type="text" id="username" name="username" class="text left required" maxlength="${global.register.maxLength}" data-rule-minlength="${global.register.minLength}" data-rule-pattern="${global.register.validCharacter}" data-rule-remote='{"url":"${ctx}/check_username.jspx","type":"post"}' data-msg-remote="用户名已经存在" data-msg-pattern="用户名不能使用非法字符" style="width:200px;"/></div>
 				<label id="username-prompt" for="username" class="prompt">${global.register.minLength}~${global.register.maxLength}个字符，支持汉字、字母、数字、下划线</label>
 			</div>
+			
+			<div class="line">
+                <label for="username" class="label"><em class="required">*</em>真实姓名:</label>
+                <div class="input"><input type="text" id="realName" name="realName" class="text left required" maxlength="3"  data-rule-pattern="([\u4e00-\u9fa5]{2,4})" data-msg-pattern="请使用2-4个汉字组成的真实姓名," style="width:200px;"/></div>
+                <label id="realName-prompt" for="realName" class="prompt">仅支持2-4个汉字</label>
+            </div>
 			<div class="line">
 				<label for="password" class="label"><em class="required">*</em>密码:</label>
 				<div class="input"><input type="password" id="password" name="password" class="text left required" style="width:200px;"/></div>
@@ -77,9 +83,24 @@ $(function() {
 				<label id="passwordAgain-prompt" for="passwordAgain" class="prompt">请再次填写密码</label>
 			</div>
 			<div class="line">
+                <label for="roleId" class="label"><em class="required">*</em>兴趣小组:</label>
+                <div class="input">
+                <select id="roleId" name="roleId"  style="width: 100px;padding: 4px;height: 30px;line-height: 30px;border: 1px solid #ccc;" class="text left required" >
+                    [@RoleList;list]
+                        [#list list as role]
+                            [#if role.name !='管理员']
+                            <option value="${role.id}">${role.name}</option>
+                            [/#if]
+                        [/#list]
+                    [/@RoleList]
+                </select>
+                </div>
+                <label id="roleId-prompt" for="roleId" class="prompt">请选择一个兴趣小组</label>
+            </div>
+			<div class="line">
 				<label for="username" class="label"><em class="required">*</em>电子邮箱:</label>
 				<div class="input"><input type="text" id="email" name="email" class="text left required email" style="width:200px;" data-msg-email="电子邮箱格式不正确"/>	</div>
-				<label id="email-prompt" for="email" class="prompt">请填写电子邮箱</label>
+				<label id="email-prompt" for="email" class="prompt">请填写域名为iflytek.com的电子邮箱</label>
 			</div>
 			<div class="line">
 				<label for="captcha" class="label"><em class="required">*</em>验证码:</label>
