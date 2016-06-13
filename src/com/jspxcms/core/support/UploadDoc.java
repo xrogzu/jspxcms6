@@ -149,23 +149,23 @@ public class UploadDoc {
 		File tempImageFile = null;
 		try {
 			if (!"pdf".equals(extension)) {
-				tempPdfFile = office2PDF(attachmentService, fileHandler, pathname, extension, pdfPathname, swfPathname,
-						file, ip, userId, siteId);
-				tempSwfFile = pdf2Swf(attachmentService, fileHandler, pathname, extension, pdfPathname, swfPathname,
-						tempPdfFile, ip, userId, siteId);
+				tempPdfFile = UploadDoc.office2PDF(attachmentService, fileHandler, pathname, extension, pdfPathname,
+						swfPathname, file, ip, userId, siteId);
+				tempSwfFile = UploadDoc.pdf2Swf(attachmentService, fileHandler, pathname, extension, pdfPathname,
+						swfPathname, tempPdfFile, ip, userId, siteId);
 				// use sending stream method to avoid moving tempFile
 				fileHandler.storeFile(FileUtils.openInputStream(file), pathname);
 			} else {
 				fileHandler.storeFile(FileUtils.openInputStream(file), pathname);
 				tempPdfFile = file;
-				tempSwfFile = pdf2Swf(attachmentService, fileHandler, pathname, extension, pdfPathname, swfPathname,
-						file, ip, userId, siteId);
+				tempSwfFile = UploadDoc.pdf2Swf(attachmentService, fileHandler, pathname, extension, pdfPathname,
+						swfPathname, file, ip, userId, siteId);
 			}
 			//
-			tempImageFile = Pdf2CoverPng(attachmentService, fileHandler, pdfPathname, imagePathname, tempPdfFile, ip,
-					userId, siteId);
+			tempImageFile = UploadDoc.Pdf2CoverPng(attachmentService, fileHandler, pdfPathname, imagePathname,
+					tempPdfFile, ip, userId, siteId);
 			// 抽取PDF文本作为全文检索
-			String tempText = pdf2text(tempPdfFile);
+			String tempText = UploadDoc.pdf2text(tempPdfFile);
 			extraText.append(tempText);
 
 			if (tempImageFile != null) {
@@ -203,7 +203,7 @@ public class UploadDoc {
 				outputFile.getParentFile().mkdirs();
 			}
 
-			connection = openOfficeConnectionPool.borrowObject();
+			connection = UploadDoc.openOfficeConnectionPool.borrowObject();
 
 			// convert
 			DocumentConverter converter = new OpenOfficeDocumentConverter(connection);
@@ -218,13 +218,13 @@ public class UploadDoc {
 
 			return outputFile;
 		} catch (ConnectException e) {
-			logger.error("连接openoffice 失败", e);
+			UploadDoc.logger.error("连接openoffice 失败", e);
 			return null;
 		} catch (IOException e) {
-			logger.error("读取openoffice IO失败", e);
+			UploadDoc.logger.error("读取openoffice IO失败", e);
 			return null;
 		} finally {
-			openOfficeConnectionPool.returnObject(connection);
+			UploadDoc.openOfficeConnectionPool.returnObject(connection);
 		}
 	}
 
@@ -247,11 +247,11 @@ public class UploadDoc {
 			fullCmd.append("\t");
 			fullCmd.append("-f 1 -l 1 ");
 
-			logger.info("run cmd:" + fullCmd);
+			UploadDoc.logger.info("run cmd:" + fullCmd);
 			// 执行命令
 			Process process = java.lang.Runtime.getRuntime().exec(new String[] { "sh", "-c", fullCmd.toString() });
-			new StreamPrinter("STDOUT", process.getInputStream(), logger).asyncPrint();
-			new StreamPrinter("STDERROR", process.getErrorStream(), logger).asyncPrint();
+			new StreamPrinter("STDOUT", process.getInputStream(), UploadDoc.logger).asyncPrint();
+			new StreamPrinter("STDERROR", process.getErrorStream(), UploadDoc.logger).asyncPrint();
 			process.waitFor();
 			// use sending stream parameter instead of sending File parameter to
 			// avoid the
@@ -261,10 +261,10 @@ public class UploadDoc {
 			return realImageFile;
 
 		} catch (IOException e) {
-			logger.error("pdftopng转换 IO失败", e);
+			UploadDoc.logger.error("pdftopng转换 IO失败", e);
 			return null;
 		} catch (InterruptedException e) {
-			logger.error("xpdf->pdftopng命令执行中断", e);
+			UploadDoc.logger.error("xpdf->pdftopng命令执行中断", e);
 			return null;
 		} finally {
 			FileUtils.deleteQuietly(tempOutputFile);
@@ -284,17 +284,18 @@ public class UploadDoc {
 			StringBuilder fullCmd = new StringBuilder();
 
 			fullCmd.append(Constants.SWFTOOLS_PDF2SWF);
-			fullCmd.append("\t");
+			fullCmd.append(" -T 9 ");
+
 			fullCmd.append(pdfFile.getAbsolutePath());
 			fullCmd.append("\t");
 			fullCmd.append("-o ");
 			fullCmd.append(tempOutputFile.getAbsolutePath());
 
-			logger.info("run cmd:" + fullCmd);
+			UploadDoc.logger.info("run cmd:" + fullCmd);
 			// 执行命令
 			Process process = java.lang.Runtime.getRuntime().exec(new String[] { "sh", "-c", fullCmd.toString() });
-			new StreamPrinter("STDOUT", process.getInputStream(), logger).asyncPrint();
-			new StreamPrinter("STDERROR", process.getErrorStream(), logger).asyncPrint();
+			new StreamPrinter("STDOUT", process.getInputStream(), UploadDoc.logger).asyncPrint();
+			new StreamPrinter("STDERROR", process.getErrorStream(), UploadDoc.logger).asyncPrint();
 			process.waitFor(2000, TimeUnit.MILLISECONDS);
 			process.waitFor();
 
@@ -305,10 +306,10 @@ public class UploadDoc {
 			return tempOutputFile;
 
 		} catch (IOException e) {
-			logger.error("swftools转换 IO失败", e);
+			UploadDoc.logger.error("swftools转换 IO失败", e);
 			return null;
 		} catch (InterruptedException e) {
-			logger.error("swftools->pdf2swf命令执行中断", e);
+			UploadDoc.logger.error("swftools->pdf2swf命令执行中断", e);
 			return null;
 		}
 	}
@@ -330,21 +331,21 @@ public class UploadDoc {
 			fullCmd.append("\t");
 			fullCmd.append("-enc UTF-8 ");
 
-			logger.info("run cmd:" + fullCmd);
+			UploadDoc.logger.info("run cmd:" + fullCmd);
 			// 执行命令
 			Process process = java.lang.Runtime.getRuntime().exec(new String[] { "sh", "-c", fullCmd.toString() });
-			new StreamPrinter("STDOUT", process.getInputStream(), logger).asyncPrint();
-			new StreamPrinter("STDERROR", process.getErrorStream(), logger).asyncPrint();
+			new StreamPrinter("STDOUT", process.getInputStream(), UploadDoc.logger).asyncPrint();
+			new StreamPrinter("STDERROR", process.getErrorStream(), UploadDoc.logger).asyncPrint();
 			process.waitFor();
 
 			String text = FileUtils.readFileToString(tempOutputFile);
 			return text;
 
 		} catch (IOException e) {
-			logger.error("pdftotext转换 IO失败", e);
+			UploadDoc.logger.error("pdftotext转换 IO失败", e);
 			return null;
 		} catch (InterruptedException e) {
-			logger.error("xpdf->pdftotext命令执行中断", e);
+			UploadDoc.logger.error("xpdf->pdftotext命令执行中断", e);
 			return null;
 		} finally {
 			FileUtils.deleteQuietly(tempOutputFile);
